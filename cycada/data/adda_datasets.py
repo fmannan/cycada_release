@@ -68,6 +68,7 @@ class AddaDataLoader(object):
                 batch_size=batch_size, shuffle=shuffle, num_workers=num_workers,
                 collate_fn=collate_fn, pin_memory=True)
         self.iters_src = iter(self.loader_src)
+        assert len(self.iters_src) > 0
 
 
     def set_loader_tgt(self):
@@ -83,6 +84,7 @@ class AddaDataLoader(object):
                 batch_size=batch_size, shuffle=shuffle, num_workers=num_workers,
                 collate_fn=collate_fn, pin_memory=True)
         self.iters_tgt = iter(self.loader_tgt)
+        assert len(self.iters_tgt) > 0
 
 
 
