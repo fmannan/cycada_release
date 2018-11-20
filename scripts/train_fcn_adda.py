@@ -80,6 +80,10 @@ def seg_accuracy(score, label, num_cls):
     acc = np.diag(hist).sum() / hist.sum()
     return intersections, unions, acc
 
+
+def normalize_max_min(x):
+    return (x - x.min()) / (x.max() - x.min())
+
 @click.command()
 @click.argument('output')
 @click.option('--dataset', required=True, multiple=True)
@@ -184,7 +188,6 @@ def main(output, dataset, datadir, lr, momentum, snapshot, downscale, cls_weight
     while iteration < max_iter:
         
         for im_s, im_t, label_s, label_t in loader:
-            
             if iteration > max_iter:
                 break
            
@@ -200,7 +203,12 @@ def main(output, dataset, datadir, lr, momentum, snapshot, downscale, cls_weight
             label_s = make_variable(label_s, requires_grad=False)
             im_t = make_variable(im_t, requires_grad=False)
             label_t = make_variable(label_t, requires_grad=False)
-           
+
+            writer.add_image('img/src', normalize_max_min(im_s), iteration)
+            writer.add_image('img/tgt', normalize_max_min(im_t), iteration)
+            writer.add_image('img/src_label', normalize_max_min(label_s), iteration)
+            writer.add_image('img/tgt_label', normalize_max_min(label_t), iteration)
+
             #############################
             # 2. Optimize Discriminator #
             #############################

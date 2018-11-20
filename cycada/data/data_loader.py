@@ -35,7 +35,7 @@ def get_transform_dataset(dataset_name, rootdir, net_transform, downscale):
     return get_fcn_dataset(dataset_name, rootdir, transform=transform,
             target_transform=target_transform)
 
-sizes = {'cityscapes': 1024, 'gta5': 1024, 'cyclegta5': 1024}
+sizes = {'cityscapes': 1024, 'gta5': 1024, 'cyclegta5': 1024, 'mapillary': 1024}
 def get_orig_size(dataset_name):
     "Size of images in the dataset for relative scaling."
     try:
@@ -123,6 +123,7 @@ def register_data_params(name):
 dataset_obj = {}
 def register_dataset_obj(name):
     def decorator(cls):
+        print('registering ', name, cls)
         dataset_obj[name] = cls
         return cls
     return decorator

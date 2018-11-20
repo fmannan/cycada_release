@@ -1,9 +1,12 @@
 import torch.utils.data as data
-from imageio import imread
+from PIL import Image
+import numpy as np
 import os
 
 from .data_loader import register_data_params, register_dataset_obj
 from .data_loader import DatasetParams
+from .cityscapes import remap_labels_to_train_ids
+from .cityscapes import id2label as LABEL2TRAIN
 
 
 @register_data_params('mapillary')
@@ -18,10 +21,12 @@ class MapillaryParams(DatasetParams):
 
 @register_dataset_obj('mapillary')
 class Mapillary(data.Dataset):
-    def __init__(self, root_dir, transforms=None):
-        self.root_dir = root_dir
-        self.transforms = transforms
-
+    def __init__(self, root, split='train', remap_labels=True, transform=None,
+                 target_transform=None):
+        self.root_dir = root
+        self.transform = transform
+        self.remap_labels = remap_labels
+        self.target_transform = target_transform
         self.length = None
         self._load_data()
 
@@ -30,8 +35,18 @@ class Mapillary(data.Dataset):
 
     def __getitem__(self, idx):
         """Returns an image and its label"""
-        img = imread(self.img_files[idx])
-        label = imread(self.label_files[idx])
+        img = Image.open(self.img_files[idx]).convert('RGB')
+        label = Image.open(self.label_files[idx])
+
+        if self.transform is not None:
+            img = self.transform(img)
+        if self.remap_labels:
+            label = np.asarray(label)
+            label = remap_labels_to_train_ids(label)
+            label = Image.fromarray(np.uint8(label), 'L')
+        if self.target_transform is not None:
+            label = self.target_transform(label)
+            
         return img, label
 
     def _load_data(self):
